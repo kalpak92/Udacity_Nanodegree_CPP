@@ -1,8 +1,4 @@
-[TOC]
-
 # Header Files
-
-<img src="https://video.udacity-data.com/topher/2019/February/5c6dea9e_header-file/header-file.png" alt="img" style="zoom:50%;" />
 
 Header files, or `.h` files, allow related function, method, and class declarations to be collected in one place. The corresponding definitions can then be placed in `.cpp` files. The compiler considers a header declaration a "promise" that the definition will be found later in the code, so if the compiler reaches a function that hasn't been defined yet, it can continue on compiling until the definition is found. This allows functions to be defined (and declared) in arbitrary order.
 
