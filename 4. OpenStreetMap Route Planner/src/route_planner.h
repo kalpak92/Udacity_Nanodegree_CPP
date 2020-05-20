@@ -18,6 +18,7 @@ class RoutePlanner {
     void AddNeighbors(RouteModel::Node *current_node);
     float CalculateHValue(RouteModel::Node const *node);
     std::vector<RouteModel::Node> ConstructFinalPath(RouteModel::Node *);
+    static bool compareFValue(const RouteModel::Node* node_a, const RouteModel::Node* node_b);
     RouteModel::Node *NextNode();
 
   private:

@@ -10,7 +10,8 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 
     // TODO 2: Use the m_Model.FindClosestNode method to find the closest nodes to the starting and ending coordinates.
     // Store the nodes you find in the RoutePlanner's start_node and end_node attributes.
-
+    start_node = &m_Model.FindClosestNode(start_x, start_y);
+    end_node = &m_Model.FindClosestNode(end_x, end_y);
 }
 
 
@@ -20,8 +21,9 @@ RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, floa
 // - Node objects have a distance method to determine the distance to another node.
 
 float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
-
+    return node->distance( *(this->end_node) );
 }
+
 
 
 // TODO 4: Complete the AddNeighbors method to expand the current node by adding all unvisited neighbors to the open list.
@@ -32,7 +34,15 @@ float RoutePlanner::CalculateHValue(RouteModel::Node const *node) {
 // - For each node in current_node.neighbors, add the neighbor to open_list and set the node's visited attribute to true.
 
 void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
-
+    // update current_node's neighbors vector
+    current_node->RouteModel::Node::FindNeighbors();
+    for (RouteModel::Node* neighbor : current_node->neighbors) {
+        neighbor->parent = current_node;
+        neighbor->g_value = current_node->g_value + current_node->distance(*neighbor);
+        neighbor->h_value = this->CalculateHValue(neighbor);
+        this->open_list.push_back(neighbor);
+        neighbor->visited = true;
+    }
 }
 
 
@@ -44,7 +54,25 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
 // - Return the pointer.
 
 RouteModel::Node *RoutePlanner::NextNode() {
+    // sort the open_list according to the f-value w/ custom compare func
+    std::sort(this->open_list.begin(), this->open_list.end(), RoutePlanner::compareFValue);
 
+    // copy the pointer to the node with lowest f-value
+    RouteModel::Node* lowest_f_val_node = this->open_list.back();
+    this->open_list.pop_back();
+
+    return lowest_f_val_node;
+}
+
+// Note: here we don NOT need to explicitly specifiy "static" here
+bool RoutePlanner::compareFValue(const RouteModel::Node* node_a, const RouteModel::Node* node_b) {
+    
+    /* Question: Not sure how to access the h_value here for the two nodes */
+
+    // float h_val_a = RoutePlanner::CalculateHValue(node_a);
+    // float h_val_b = RoutePlanner::CalculateHValue(node_b);
+    
+    return node_a->g_value + node_a->h_value > node_b->g_value + node_b->h_value;
 }
 
 
@@ -62,10 +90,17 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
     std::vector<RouteModel::Node> path_found;
 
     // TODO: Implement your solution here.
+    // keep looping until it finds the start node, whose parent is nullptr
+    RouteModel::Node* curNode = current_node;
+    while (curNode) {
+        path_found.push_back(*curNode);
+        // Also keep track of the total path distance
+        if (curNode->parent) this->distance += curNode->distance(*curNode->parent); 
+        curNode = curNode->parent;
+    }
 
     distance *= m_Model.MetricScale(); // Multiply the distance by the scale of the map to get meters.
     return path_found;
-
 }
 
 
@@ -77,8 +112,19 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
 // - Store the final path in the m_Model.path attribute before the method exits. This path will then be displayed on the map tile.
 
 void RoutePlanner::AStarSearch() {
-    RouteModel::Node *current_node = nullptr;
-
-    // TODO: Implement your solution here.
-
+    this->start_node->visited = true;
+    this->open_list.push_back(this->start_node);
+    
+    RouteModel::Node* current_node = nullptr;
+    
+    while ( !open_list.empty() )
+    {
+        current_node = this->NextNode();
+        if ( current_node->distance(*this->end_node) == 0 ) { // reach the end_node
+            m_Model.path = this->ConstructFinalPath(current_node);
+            return; // exit the A* search
+        } else { // continue A* search
+            AddNeighbors(current_node);
+        }
+    }
 }
