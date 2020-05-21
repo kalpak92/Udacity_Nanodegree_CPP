@@ -37,7 +37,7 @@ git clone https://github.com/kalpak92/Udacity_Nanodegree_CPP.git --recurse-submo
 
 
 
-![Screen Shot 2020-05-19 at 11.50.06 PM](/Users/kalpak/Desktop/Screen Shot 2020-05-19 at 11.50.06 PM.png)
+![ClassDiagram](https://github.com/kalpak92/Udacity_Nanodegree_CPP/blob/master/4.%20OpenStreetMap%20Route%20Planner/instructions/Screen%20Shot%202020-05-19%20at%2011.50.06%20PM.png)
 
 
 
